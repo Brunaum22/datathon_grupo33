@@ -4,7 +4,7 @@ import plotly.express as px
 import re 
 
 def carrega_dados():
-    df = pd.read_csv("files\PEDE_PASSOS_DATASET_FIAP.csv", sep=";")
+    df = pd.read_csv("files/PEDE_PASSOS_DATASET_FIAP.csv", sep=";")
     return df
 
 # FUNCAO PARA PODER PADRONIZAR AS INFORMACOES, BASEADO NA ESCOLHA DA PESSOA NA PAGINA

@@ -17,7 +17,7 @@ st.set_page_config(
 
 st.title("Bem vindo(a) a Plataforma de Analytics da Passos Magicos! :star2:")
 
-st.image("files\passos_magicos_logo.png")
+st.image("files/passos_magicos_logo.png")
 
 
 st.markdown("<h1 style='text-align: center; '>Quem somos</h1>", unsafe_allow_html=True)
