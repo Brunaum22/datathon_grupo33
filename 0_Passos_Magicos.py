@@ -143,4 +143,12 @@ col3.write(
 st.divider()
 st.write("Saiba mais no site: https://passosmagicos.org.br/")
 
+st.write('''
+          ## Criado por: 
+          - Bruno Silva Lopes ( rm350566 )
+          - Henrique Eiji Hashimoto ( rm350096 )
+          - Rodrigo Araújo ( rm349801 ) 
+          - Roney Molina ( rm430014 )
+
+         ''')
 

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 import numpy as np
-import seaborn as sns
 from utils import  carrega_dados, separa_anos
 
 
