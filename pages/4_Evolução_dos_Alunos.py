@@ -12,7 +12,7 @@ from utils import  carrega_dados, separa_anos, aluno_fase_pedra_inde, map_campos
 ##----------------------------------------------------------------------------------
 st.set_page_config(
   page_title="Alunos",
-  page_icon=":male-student:",
+  page_icon=":female-student:",
   layout='wide'
 )
 
