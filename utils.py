@@ -10,7 +10,7 @@ def carrega_dados():
 
 
 def carrega_csv_ideb():
-    df_table_ideb = pd.read_csv("files\ideb_territorios_3515103.csv", sep=";", encoding='latin1')
+    df_table_ideb = pd.read_csv("files/ideb_territorios_3515103.csv", sep=";", encoding='latin1')
     return df_table_ideb
 
 
