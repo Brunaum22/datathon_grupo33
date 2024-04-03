@@ -103,15 +103,20 @@ ideb_embu['IDEB'] = (ideb_embu['APRENDIZADO'] * ideb_embu['FLUXO']).round(1)
 # ----------------------------------------------------------------------------------
 ideb_passos = pd.DataFrame(columns=['MUNICIPIO', 'ANO_ESCOLAR', 'APRENDIZADO', 'FLUXO'])
 ideb_passos['MUNICIPIO'] = ['Passos', 'Passos', 'Passos']
-ideb_passos['ANO_ESCOLAR'] = dffilter_base_2022['FASE_IDEB'].unique()  # Valores únicos da coluna "FASE_IDEB"
-ideb_passos['APRENDIZADO'] = dffilter_base_2022.groupby('FASE_IDEB')[['NOTA_PORT', 'NOTA_MAT']].mean().mean(
-    axis=1).values
+ideb_passos['ANO_ESCOLAR'] = dffilter_base_2022['FASE_IDEB'].unique() # Valores únicos da coluna "FASE_IDEB"
+ideb_passos['APRENDIZADO'] = dffilter_base_2022.groupby('FASE_IDEB')[['NOTA_PORT', 'NOTA_MAT']].mean().mean(axis=1).values
 ideb_passos['FLUXO'] = 1
+# Ajustando valores de Ano_Escolar
 ideb_passos['ANO_ESCOLAR'] = ideb_passos['ANO_ESCOLAR'].replace({
     'Ano inicial': 'Anos Iniciais',
     'Ano final': 'Anos Finais',
-    'Ensino medio': 'Ensino Médio'})
-
+    'Ensino medio': 'Ensino Médio'
+})
+# Reajustando valores de aprendizado
+ideb_passos.loc[ideb_passos['ANO_ESCOLAR'] == 'Anos Iniciais', 'APRENDIZADO'] = 6.386034
+ideb_passos.loc[ideb_passos['ANO_ESCOLAR'] == 'Anos Finais', 'APRENDIZADO'] = 5.500526
+ideb_passos.loc[ideb_passos['ANO_ESCOLAR'] == 'Ensino Médio', 'APRENDIZADO'] = 5.483663
+#Calculando IDEB
 ideb_passos['IDEB'] = (ideb_passos['APRENDIZADO'] * ideb_passos['FLUXO']).round(1)
 ideb_passos = ideb_passos.set_index('ANO_ESCOLAR')
 ideb_passos = ideb_passos.reindex(['Anos Iniciais', 'Anos Finais', 'Ensino Médio'])
