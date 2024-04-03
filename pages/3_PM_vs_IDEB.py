@@ -6,7 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
-from utils import carrega_dados
+from utils import carrega_dados, carrega_csv_ideb, verifica_fase
 import plotly.express as px
 
 # ----------------------------------------------------------------------------------
@@ -21,10 +21,6 @@ st.set_page_config(
 # ----------------------------------------------------------------------------------
 # Carregar dados e formatar df
 # ----------------------------------------------------------------------------------
-def carrega_csv_ideb():
-    df_table_ideb = pd.read_csv("D:\Downloads\ideb_territorios_3515103.csv", sep=";", encoding='latin1')
-    return df_table_ideb
-
 
 df = carrega_dados()
 
@@ -82,21 +78,6 @@ dffilter_base_2022 = dffilter_base.query("ANO == 2022")
 
 
 # ----------------------------------------------------------------------------------
-# Identificar se a fase do aluno na PM é "Ano Inicial, Final ou Ensino Médio"
-def verifica_fase(row):
-    fase = row['FASE']
-    if pd.isna(fase):
-        return None  # Se algum dos valores for nulo
-    elif fase <= 2:
-        return "Ano inicial"
-    elif 2 < fase < 5:
-        return "Ano final"
-    elif 5 <= fase < 8:
-        return "Ensino medio"
-    else:
-        return "Universidade"
-
-
 dffilter_base_2022['FASE_IDEB'] = dffilter_base_2022.apply(verifica_fase, axis=1)
 dffilter_base_2022['FASE_IDEB'] = dffilter_base_2022['FASE_IDEB'].replace({
     'Ano inicial': 'Anos Iniciais',
