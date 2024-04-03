@@ -318,6 +318,11 @@ ideb_passos_concat.sort_values(by=['IDEB'], ascending=False)
 col1_select_2, col2_select_2, col3_select_2 = st.columns(3)
 fase_selecionada_2 = col2_select_2.selectbox("", opcoes_anos, key='fase_selecionada_2')
 
+df_notas = dffilter_base_2022[dffilter_base_2022['FASE_IDEB'] == fase_selecionada_2]
+mean_port = df_notas['NOTA_PORT'].mean()
+mean_mat = df_notas['NOTA_MAT'].mean()
+aprendizado_2 = (mean_port + mean_mat) / 2
+
 # Ajustando colunas do conteúdo
 col1_tabela, col2_tabela = st.columns([1.7, 1])
 with col1_tabela:
@@ -342,7 +347,7 @@ with col2_tabela:
     for i in range(100, 89, -1):
         fluxo = i / 100
         st.markdown(
-            f"IDEB seria :green[{aprendizado * fluxo:,.2f}] se o fluxo fosse {fluxo:,.2f}, para {fase_selecionada_2};", )
+            f"IDEB seria :green[{aprendizado_2 * fluxo:,.2f}] se o fluxo fosse {fluxo:,.2f}, para {fase_selecionada_2};", )
 
     st.write("\n")
     st.write('* Fluxo: é a taxa de aprovação. Um fluxo de 1 é obtido caso 100% dos alunos forem aprovados.')
