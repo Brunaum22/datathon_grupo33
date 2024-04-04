@@ -3,6 +3,12 @@ import pandas as pd
 import plotly.express as px
 import re
 import numpy as np
+from sklearn import *
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+listEstatistic = []
 
 def carrega_dados():
     df = pd.read_csv("files/PEDE_PASSOS_DATASET_FIAP.csv", sep=";")
