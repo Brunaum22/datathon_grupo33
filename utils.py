@@ -190,3 +190,176 @@ def verifica_fase(row):
         return "Ensino medio"
     else:
         return "Universidade"
+
+
+def converterFloat(df, campo):
+    df[campo] = round(pd.to_numeric(df[campo],"coerce"), 2)
+
+def trata_base_classif(df, tipo,  campos=[]):
+    df_2020 = pd.DataFrame()
+    df_2021 = pd.DataFrame()
+    df_2022 = pd.DataFrame()
+
+    for col in df.columns:
+        if re.search('2020', col , re.IGNORECASE):
+            #print(f"Campo com 2020 : {col}")
+            df_2020["ANO"] = 2020
+            df_2020[col] = df[col]
+        elif re.search('2021', col , re.IGNORECASE):
+            #print(f"Campo com 2021 : {col}")
+            df_2021["ANO"] = 2021
+            df_2021[col] = df[col]
+        elif re.search('2022', col , re.IGNORECASE):
+            #print(f"Campo com 2022 : {col}")
+            df_2022["ANO"] = 2022
+            df_2022[col] = df[col]
+        else:
+            df_2020[col] = df[col]
+            df_2021[col] = df[col]
+            df_2022[col] = df[col]
+
+    for col in df_2020.columns:
+        #print(col)
+        if re.search('2020', col , re.IGNORECASE):
+            df_2020 = df_2020.rename(columns={col: col[:-5]})
+
+    for col in df_2021.columns:
+        #print(col)
+        if re.search('2021', col , re.IGNORECASE):
+            df_2021 = df_2021.rename(columns={col: col[:-5]})
+
+    for col in df_2022.columns:
+        #print(col)
+        if re.search('2022', col , re.IGNORECASE):
+            df_2022 = df_2022.rename(columns={col: col[:-5]})
+
+    df_concat = pd.concat([df_2020, df_2021, df_2022])
+
+    df_concat["NULO"] = df_concat.isnull().sum(1)
+    df_concat["NULO"] = df_concat["NULO"].map({41: True, np.NaN: True})
+    df_concat["NULO"] = df_concat["NULO"].map({True: True, np.NaN: False})
+
+    df_concat = df_concat.query("NULO == False")
+    df_base = df_concat[df_concat.columns[:-1]]
+    dffilter_base = df_base[df_base['INDE'].notnull()]
+    if (tipo == "p"):
+        dffilter_base = dffilter_base[dffilter_base['NOTA_PORT'].notnull()]
+        dffilter_base = dffilter_base[dffilter_base['NOTA_ING'].notnull()]
+        dffilter_base = dffilter_base[dffilter_base['NOTA_MAT'].notnull()]
+
+    dffilter_base['FASE_NUM'] = dffilter_base['FASE_TURMA'].str.slice(0, 1)
+    converterFloat(dffilter_base, "INDE")
+    converterFloat(dffilter_base, "IPV")
+    converterFloat(dffilter_base, "IDA")
+    converterFloat(dffilter_base, "IPP")
+    converterFloat(dffilter_base, "NOTA_PORT")
+    converterFloat(dffilter_base, "NOTA_ING")
+    converterFloat(dffilter_base, "IAN")
+    converterFloat(dffilter_base, "NOTA_MAT")
+    converterFloat(dffilter_base, "IAA")
+    converterFloat(dffilter_base, "IPS")
+    converterFloat(dffilter_base, "IEG")
+
+    capturarMediaPedra(dffilter_base)
+    dffilter_base['MEDIA'] = dffilter_base['PEDRA'].apply(gerarMedia)
+    dffilter_base['STATUS'] = np.where(dffilter_base['INDE'] <= dffilter_base['MEDIA'], 'DESENVOLVER', 'BOM')
+
+    
+    if len(campos) != 0:
+        return dffilter_base[campos]
+
+    return dffilter_base
+
+def container(variavel):
+    container = st.container(border=True)
+    return container.slider("% " + variavel, 0, 100, 0)
+
+def filtra(df, tipo, valor):
+    if tipo == "pedra":
+        return df.query("PEDRA == '" + valor + "'")
+    elif tipo == "fase":
+        return df.query("FASE_NUM == '" + valor + "'")
+    elif tipo == "nome":
+        if valor != "":
+            return df.query("NOME == '" + valor + "'")
+        else:
+            return df
+        
+def capturarMediaPedra(df):
+    
+    dados_estatist = df.groupby('PEDRA').describe()
+    
+    for x in dados_estatist.index:
+        varEstatistc = []
+        varEstatistc.append(x)
+        varEstatistc.append(dados_estatist.loc[(x), ('INDE', '50%')])
+        listEstatistic.append(varEstatistc)
+    
+    return listEstatistic
+
+def gerarMedia(pedra):
+  for x in listEstatistic:
+    if pedra == x[0]:
+      return x[1]
+
+def novosIndicadoresPercentuais(df, ind, valor):
+    if ind != 0:
+        nome_var = "novo_" + ind
+        df[nome_var] = ((valor / 100) * df[ind]) + df[ind]
+        return df
+
+def modeloKNN(df_filtrado):
+        df_mod_semna = df_filtrado[["STATUS", "IPV", "IDA", "IPP", "NOTA_PORT", "NOTA_ING", "IAN", "NOTA_MAT", "IAA", "IPS", "IEG"]].dropna(axis=0, how='any')
+        x = df_mod_semna[["IPV", "IDA", "IPP", "NOTA_PORT", "NOTA_ING", "IAN", "NOTA_MAT", "IAA", "IPS", "IEG"]]
+        y = df_mod_semna['STATUS']
+
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, stratify=y, random_state=42)
+
+        modelo_classificador = KNeighborsClassifier(n_neighbors=5)
+
+        modelo_classificador.fit(x_train, y_train)
+
+        #vars = df_filtrado["IPV"], df_filtrado["IDA"], df_filtrado["IPP"], df_filtrado["NOTA_PORT"], df_filtrado["NOTA_ING"], df_filtrado["IAN"], df_filtrado["NOTA_MAT"], df_filtrado["IAA"], df_filtrado["IPS"], df_filtrado["IEG"]
+
+        resultsFinal = []
+        for i in range(len(df_filtrado)):
+          var = [df_filtrado.iloc[i, 14], df_filtrado.iloc[i, 15], df_filtrado.iloc[i, 16], df_filtrado.iloc[i, 17], df_filtrado.iloc[i, 18], df_filtrado.iloc[i, 19], df_filtrado.iloc[i, 20], df_filtrado.iloc[i, 21], df_filtrado.iloc[i, 22], df_filtrado.iloc[i, 23]]
+          results = []
+          results.append(df_filtrado.iloc[i, 0])
+          results.append(modelo_classificador.predict([var]))
+          results.append(df_filtrado.iloc[i, 1])
+          results.append(df_filtrado.iloc[i, 2])
+          results.append(df_filtrado.iloc[i, 3])
+          results.append(df_filtrado.iloc[i, 4])
+          results.append(df_filtrado.iloc[i, 5])
+          results.append(df_filtrado.iloc[i, 6])
+          results.append(df_filtrado.iloc[i, 7])
+          results.append(df_filtrado.iloc[i, 8])
+          results.append(df_filtrado.iloc[i, 9])
+          results.append(df_filtrado.iloc[i, 10])
+          results.append(df_filtrado.iloc[i, 11])
+          results.append(df_filtrado.iloc[i, 12])
+          results.append(df_filtrado.iloc[i, 13])
+
+          resultsFinal.append(results)
+
+        novos_nomes = {
+            0: "STATUS",
+            1: "novo_STATUS",
+            2: "ANO",
+            3: "NOME",
+            4: "PEDRA",
+            5: "IPV",
+            6: "IDA",
+            7: "IPP",
+            8: "NOTA_PORT",
+            9: "NOTA_ING",
+            10: "IAN",
+            11: "NOTA_MAT",
+            12: "IAA",
+            13: "IPS",
+            14: "IEG"
+        }       
+        df_resultado = pd.DataFrame(resultsFinal)
+        df_resultado = df_resultado.rename(columns=novos_nomes)
+        return df_resultado
