@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import re
-
+import numpy as np
 
 def carrega_dados():
     df = pd.read_csv("files/PEDE_PASSOS_DATASET_FIAP.csv", sep=";")
